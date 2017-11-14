@@ -10,6 +10,7 @@
 		<a href="index.html">Home</a>
 	</h3>
 	<h2>Meals</h2>
+	<a href="meals?action=add">Add meal</a>
 	<table>
 		<tr>
 			<th>Description</th>
@@ -29,8 +30,8 @@
 				<td><font color=${meal.exceed ?  "red": "green"}> <c:out
 							value="${meal.calories}" />
 				</font></td>
-				<td><a href="/topjava/edit?id=${meal.id}">Edit</a></td>
-				<td><a href="/topjava/delete?id=${meal.id}">Remove</a></td>
+				<td><a href="/topjava/meals?action=edit&id=${meal.id}">Edit</a></td>
+				<td><a href="/topjava/meals?action=remove&id=${meal.id}">Remove</a></td>
 			</tr>
 		</c:forEach>
 	</table>

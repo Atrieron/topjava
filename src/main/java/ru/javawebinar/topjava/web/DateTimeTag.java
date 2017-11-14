@@ -9,7 +9,7 @@ import javax.servlet.jsp.SkipPageException;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 public class DateTimeTag extends SimpleTagSupport {
-	private final static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MM yyyy hh:mm");
+	private final static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MM yyyy HH:mm");
 
 	private LocalDateTime date;
 
