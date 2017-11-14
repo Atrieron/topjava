@@ -1,7 +1,7 @@
 package ru.javawebinar.topjava.util;
 
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.MealWithExceed;
+import ru.javawebinar.topjava.to.MealWithExceed;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,12 +17,19 @@ import static java.util.stream.Collectors.toList;
 
 public class MealsUtil {
     public static final List<Meal> MEALS = Arrays.asList(
-            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Р—Р°РІС‚СЂР°Рє", 500),
-            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "РћР±РµРґ", 1000),
-            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "РЈР¶РёРЅ", 500),
-            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Р—Р°РІС‚СЂР°Рє", 1000),
-            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "РћР±РµРґ", 500),
-            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "РЈР¶РёРЅ", 510)
+            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Breakfast", 500, 1),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Dinner", 1000, 1),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Supper", 500, 1),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Breakfast", 1000, 1),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Dinner", 500, 1),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Supper", 510, 1),
+            
+            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Breakfast", 515, 2),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 18, 0), "Supper", 530, 2),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 30, 23, 30), "Late Supper", 100, 2),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Breakfast", 240, 2),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Dinner", 700, 2),
+            new Meal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Supper", 200, 2)
     );
 
     public static final int DEFAULT_CALORIES_PER_DAY = 2000;
