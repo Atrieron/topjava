@@ -12,20 +12,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.to.MealWithExceed;
+import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 @Controller
 public class MealRestController {
 	protected final Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Autowired
-    private MealService service;
+	private MealService service;
 
 	public Meal create(Meal meal) {
 		log.info("create {}", meal);
-        checkNew(meal);
+		checkNew(meal);
 		return service.create(meal);
 	}
 
@@ -45,22 +48,27 @@ public class MealRestController {
 		service.update(meal);
 	}
 
-	public List<Meal> getAll() {
+	public List<MealWithExceed> getAll() {
 		log.info("getAll");
-		return service.getAll();
+		if (service == null)
+			log.error("Meal service is null");
+		return MealsUtil.getWithExceeded(service.getAll(), AuthorizedUser.getCaloriesPerDay());
 	}
 
-	public List<Meal> getInPeriod(LocalDate periodStart, LocalDate periodEnd, LocalTime timeStart, LocalTime timeEnd) {
+	public List<MealWithExceed> getInPeriod(LocalDate periodStart, LocalDate periodEnd, LocalTime timeStart,
+			LocalTime timeEnd) {
 		StringBuilder stringBuilder = new StringBuilder("Get in period");
-		if(periodStart!=null)
+		if (periodStart != null)
 			stringBuilder.append(" after " + periodStart);
-		if(periodEnd!=null)
+		if (periodEnd != null)
 			stringBuilder.append(" before " + periodEnd);
-		if(timeStart!=null)
+		if (timeStart != null)
 			stringBuilder.append(" after " + timeStart);
-		if(timeEnd!=null)
+		if (timeEnd != null)
 			stringBuilder.append(" before " + timeEnd);
 		log.info(stringBuilder.toString());
-		return service.getInPeriod(periodStart, periodEnd, timeStart, timeEnd);
-	}	
+		return MealsUtil.getWithExceeded(service.getInPeriod(periodStart == null ? LocalDate.MIN : periodStart,
+				periodEnd == null ? LocalDate.MAX : periodEnd, timeStart == null ? LocalTime.MIN : timeStart,
+				timeEnd == null ? LocalTime.MAX : timeEnd), AuthorizedUser.getCaloriesPerDay());
+	}
 }

@@ -16,15 +16,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class InMemoryMealRepositoryImpl implements MealRepository {
+	private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepositoryImpl.class);
 	private Map<Integer, Meal> repository = new ConcurrentHashMap<>();
 	private AtomicInteger counter = new AtomicInteger(0);
 
-	{
-		MealsUtil.MEALS.forEach(this::save);
+	public InMemoryMealRepositoryImpl() {
+		MealsUtil.MEALS.forEach((elt) -> {
+			elt.setId(counter.incrementAndGet());
+			repository.put(elt.getId(), elt);
+		});
 	}
 
 	@Override
@@ -58,6 +64,7 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
 	@Override
 	public List<Meal> getAll() {
+		log.info("Requested all meal for " + AuthorizedUser.id());
 		return repository.values().stream().filter(elt -> elt.getUserId() == AuthorizedUser.id())
 				.sorted(new Comparator<Meal>() {
 					@Override
