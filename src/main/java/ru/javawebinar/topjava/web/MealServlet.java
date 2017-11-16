@@ -6,6 +6,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.Meal;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import javax.servlet.ServletException;
@@ -13,7 +14,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -42,15 +45,21 @@ public class MealServlet extends HttpServlet {
 				mealRestController.update(meal, Integer.valueOf(id));
 			}
 			log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
+			response.sendRedirect("meals");
+			return;
 		}
 
 		String userId = request.getParameter("userId");
 		if (userId != null) {
 			log.info("Authorized " + userId);
 			AuthorizedUser.setId(Integer.parseInt(userId));
+			request.setAttribute("meals",
+					mealRestController.getInPeriod(DateTimeUtil.parseLocalDateOrDefault(request.getParameter("startDate"), null),
+							DateTimeUtil.parseLocalDateOrDefault(request.getParameter("endDate"),null), DateTimeUtil.parseLocalTimeOrDefault(request.getParameter("startTime"),null),
+							DateTimeUtil.parseLocalTimeOrDefault(request.getParameter("endTime"),null)));
+			request.setAttribute("currentId", AuthorizedUser.id());
+			request.getRequestDispatcher("/meals.jsp").forward(request, response);
 		}
-
-		response.sendRedirect("meals");
 	}
 
 	@Override
