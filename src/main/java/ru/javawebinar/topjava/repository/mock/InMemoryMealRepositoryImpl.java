@@ -20,12 +20,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ru.javawebinar.topjava.repository.mock.InMemoryUserRepositoryImpl.ADMIN_ID;
-import static ru.javawebinar.topjava.repository.mock.InMemoryUserRepositoryImpl.USER_ID;
+import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
+import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 @Repository
 public class InMemoryMealRepositoryImpl implements MealRepository {
-	private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepositoryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepositoryImpl.class);
 
     // Map  userId -> (mealId-> meal)
     private Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
@@ -34,8 +34,8 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     {
         MealsUtil.MEALS.forEach(meal -> save(meal, USER_ID));
 
-        save(new Meal(LocalDateTime.of(2015, Month.JUNE, 1, 14, 0), "Админ ланч", 510), ADMIN_ID);
-        save(new Meal(LocalDateTime.of(2015, Month.JUNE, 1, 21, 0), "Админ ужин", 1500), ADMIN_ID);
+        save(new Meal(LocalDateTime.of(2015, Month.JUNE, 1, 14, 0), "РђРґРјРёРЅ Р»Р°РЅС‡", 510), ADMIN_ID);
+        save(new Meal(LocalDateTime.of(2015, Month.JUNE, 1, 21, 0), "РђРґРјРёРЅ СѓР¶РёРЅ", 1500), ADMIN_ID);
     }
 
 
@@ -48,16 +48,6 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
             return meal;
         }
         return meals.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
-    }
-    
-    @PostConstruct
-    public void postConstruct() {
-        log.info("+++ PostConstruct");
-    }
-
-    @PreDestroy
-    public void preDestroy() {
-        log.info("+++ PreDestroy");
     }
 
     @Override

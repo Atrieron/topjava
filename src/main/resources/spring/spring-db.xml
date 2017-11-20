@@ -4,25 +4,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!--
-            <bean class="ru.javawebinar.topjava.repository.mock.MockUserRepositoryImpl" id="mockUserRepository"/>
-
-            <bean class="ru.javawebinar.topjava.service.UserServiceImpl">
-                <constructor-arg name="repository" ref="mockUserRepository"/>
-            </bean>
-    -->
-
-    <!-- Not necessary, already included with component-scan -->
-    <!--<context:annotation-config/>-->
-
-    <context:component-scan base-package="ru.javawebinar.**.repository"/>
-
-    <context:component-scan base-package="ru.javawebinar.**.service"/>
-
-    <context:component-scan base-package="ru.javawebinar.**.web"/>
-    
     <context:property-placeholder location="classpath:db/postgres.properties" system-properties-mode="OVERRIDE"/>
-    
+
+    <!--no pooling-->
     <bean id="dataSource"
           class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="org.postgresql.Driver"/>
@@ -38,5 +22,4 @@
     <bean id="namedJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
         <constructor-arg ref="dataSource"/>
     </bean>
-
 </beans>
