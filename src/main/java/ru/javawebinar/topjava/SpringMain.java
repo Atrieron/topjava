@@ -22,13 +22,17 @@ public class SpringMain {
 		// java 7 Automatic resource management
 		try (ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
 			System.out.println("Bean definition names: " + Arrays.toString(appCtx.getBeanDefinitionNames()));
-			// AdminRestController adminUserController =
-			// appCtx.getBean(AdminRestController.class);
-			// adminUserController.create(new User(null, "userName", "email", "password",
-			// Role.ROLE_ADMIN));
+			AdminRestController adminUserController =
+			 appCtx.getBean(AdminRestController.class);
+			User newUser = adminUserController.create(new User(null, "userName", "email", "password",
+					 Role.ROLE_ADMIN));
 			System.out.println();
 
 			MealRestController mealController = appCtx.getBean(MealRestController.class);
+			AuthorizedUser.setId(newUser.getId());
+			mealController.create(new Meal(LocalDateTime.of(2016, 7, 14, 2, 0), "lunch", 200));
+			mealController.create(new Meal(LocalDateTime.of(2016, 7, 14, 2, 0), "more lunch", 700));
+
 			List<MealWithExceed> filteredMealsWithExceeded = mealController.getAll();
 			// mealController.getBetween(
 			// LocalDate.of(2015, Month.MAY, 30), LocalTime.of(7, 0),
