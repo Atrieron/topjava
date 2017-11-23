@@ -37,7 +37,7 @@ public class InMemoryAdminRestControllerTest {
         repository.init();
     }
 
-    //@Test
+    @Test
     public void testDelete() throws Exception {
         controller.delete(UserTestData.USER_ID);
         Collection<User> users = controller.getAll();
@@ -45,7 +45,7 @@ public class InMemoryAdminRestControllerTest {
         Assert.assertEquals(users.iterator().next(), ADMIN);
     }
 
-    //@Test(expected = NotFoundException.class)
+    @Test(expected = NotFoundException.class)
     public void testDeleteNotFound() throws Exception {
         controller.delete(10);
     }
