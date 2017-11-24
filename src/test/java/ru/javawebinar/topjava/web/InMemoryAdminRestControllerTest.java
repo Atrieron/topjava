@@ -1,3 +1,4 @@
+/*
 package ru.javawebinar.topjava.web;
 
 import org.junit.*;
@@ -50,3 +51,4 @@ public class InMemoryAdminRestControllerTest {
         controller.delete(10);
     }
 }
+*/
