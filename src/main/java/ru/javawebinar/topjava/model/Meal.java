@@ -20,9 +20,9 @@ import java.time.LocalTime;
 @NamedQueries({
     @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=:id and m.user.id=:user_id"),
     //@NamedQuery(name = Meal.BY_EMAIL, query = "SELECT m FROM Meal m LEFT WHERE u.email=?1"),
-    @NamedQuery(name = Meal.ALL_SORTED, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.user.id=:user_id ORDER BY m.dateTime DESC"),
-    @NamedQuery(name = Meal.FIND_BY_ID, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.id=:id AND m.user.id=:user_id"),
-    @NamedQuery(name = Meal.FIND_BETWEEN, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.user.id=:user_id AND m.dateTime >= :startTime AND m.dateTime<:endTime ORDER BY m.dateTime DESC"),
+    @NamedQuery(name = Meal.ALL_SORTED, query = "SELECT m FROM Meal m WHERE m.user.id=:user_id ORDER BY m.dateTime DESC"),
+    @NamedQuery(name = Meal.FIND_BY_ID, query = "SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:user_id"),
+    @NamedQuery(name = Meal.FIND_BETWEEN, query = "SELECT m FROM Meal m WHERE m.user.id=:user_id AND m.dateTime >= :startTime AND m.dateTime<:endTime ORDER BY m.dateTime DESC"),
 })
 @Entity
 @Table(name="meals", uniqueConstraints = {@UniqueConstraint(columnNames = "date_time", name = "meals_unique_user_datetime_idx")})

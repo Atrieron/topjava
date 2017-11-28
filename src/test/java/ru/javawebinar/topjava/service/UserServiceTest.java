@@ -1,4 +1,3 @@
-/*
 package ru.javawebinar.topjava.service;
 
 import org.junit.Test;
@@ -92,4 +91,3 @@ public class UserServiceTest {
         assertMatch(all, ADMIN, USER);
     }
 }
-*/

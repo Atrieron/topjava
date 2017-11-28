@@ -9,8 +9,6 @@ import java.util.List;
 import static java.time.LocalDateTime.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
-
-import static ru.javawebinar.topjava.UserTestData.ADMIN;
 import static ru.javawebinar.topjava.UserTestData.USER;
 
 public class MealTestData {
@@ -25,36 +23,21 @@ public class MealTestData {
     public static final Meal MEAL6 = new Meal(MEAL1_ID + 5, of(2015, Month.MAY, 31, 20, 0), "РЈР¶РёРЅ", 510);
     public static final Meal ADMIN_MEAL1 = new Meal(ADMIN_MEAL_ID, of(2015, Month.JUNE, 1, 14, 0), "РђРґРјРёРЅ Р»Р°РЅС‡", 510);
     public static final Meal ADMIN_MEAL2 = new Meal(ADMIN_MEAL_ID + 1, of(2015, Month.JUNE, 1, 21, 0), "РђРґРјРёРЅ СѓР¶РёРЅ", 1500);
-    
-    static
-    {
-    	MEAL1.setUser(USER);
-    	MEAL2.setUser(USER);
-    	MEAL3.setUser(USER);
-    	MEAL4.setUser(USER);
-    	MEAL5.setUser(USER);
-    	MEAL6.setUser(USER);
-    	
-    	ADMIN_MEAL1.setUser(ADMIN);
-    	ADMIN_MEAL2.setUser(ADMIN);
-    }
 
     public static final List<Meal> MEALS = Arrays.asList(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1);
 
     public static Meal getCreated() {
-        Meal ret = new Meal(null, of(2015, Month.JUNE, 1, 18, 0), "РЎРѕР·РґР°РЅРЅС‹Р№ СѓР¶РёРЅ", 300);
-        ret.setUser(USER);
-		return ret;
+		return new Meal(null, of(2015, Month.JUNE, 1, 18, 0), "РЎРѕР·РґР°РЅРЅС‹Р№ СѓР¶РёРЅ", 300);
     }
 
     public static Meal getUpdated() {
-        Meal ret = new Meal(MEAL1_ID, MEAL1.getDateTime(), "РћР±РЅРѕРІР»РµРЅРЅС‹Р№ Р·Р°РІС‚СЂР°Рє", 200);
-        ret.setUser(MEAL1.getUser());
-		return ret;
+		Meal updatedMeal = new Meal(MEAL1_ID, MEAL1.getDateTime(), "РћР±РЅРѕРІР»РµРЅРЅС‹Р№ Р·Р°РІС‚СЂР°Рє", 200);
+		updatedMeal.setUser(USER);
+		return updatedMeal;
     }
 
     public static void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).isEqualToComparingFieldByField(expected);
+        assertThat(actual).isEqualToIgnoringGivenFields(expected, "user");
     }
 
     public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
@@ -62,6 +45,6 @@ public class MealTestData {
     }
 
     public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
-        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
+        assertThat(actual).usingElementComparatorIgnoringFields("user").isEqualTo(expected);
     }
 }
