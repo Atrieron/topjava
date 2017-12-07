@@ -25,7 +25,6 @@ public interface CrudUserRepository extends JpaRepository<User, Integer> {
     User save(User user);
 
     @Override
-    //@EntityGraph("meals")
     @Transactional
     Optional<User> findById(Integer id);
 
@@ -35,4 +34,8 @@ public interface CrudUserRepository extends JpaRepository<User, Integer> {
 
     @Transactional
     User getByEmail(String email);
+    
+    @Query("SELECT u FROM User u WHERE u.id=:id")
+    @EntityGraph(attributePaths="meals")
+    Optional<User> getWithMeals(@Param("id") Integer id);
 }

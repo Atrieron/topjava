@@ -42,7 +42,6 @@ public class DataJpaUserRepositoryImpl implements UserRepository {
 
 	@Override
 	public User getWithMeals(int id) {
-		// TODO Auto-generated method stub
-		return UserRepository.super.getWithMeals(id);
+		return crudRepository.getWithMeals(id).orElse(null);
 	}
 }
