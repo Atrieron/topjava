@@ -8,6 +8,7 @@ import java.util.List;
 
 import static java.time.LocalDateTime.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.javawebinar.topjava.UserTestData.ADMIN;
 import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
 
 public class MealTestData {
@@ -21,8 +22,13 @@ public class MealTestData {
     public static final Meal MEAL5 = new Meal(MEAL1_ID + 4, of(2015, Month.MAY, 31, 13, 0), "РћР±РµРґ", 1000);
     public static final Meal MEAL6 = new Meal(MEAL1_ID + 5, of(2015, Month.MAY, 31, 20, 0), "РЈР¶РёРЅ", 510);
     public static final Meal ADMIN_MEAL1 = new Meal(ADMIN_MEAL_ID, of(2015, Month.JUNE, 1, 14, 0), "РђРґРјРёРЅ Р»Р°РЅС‡", 510);
+    public static final Meal ADMIN_MEAL_WITH_USER = new Meal(ADMIN_MEAL_ID, of(2015, Month.JUNE, 1, 14, 0), "РђРґРјРёРЅ Р»Р°РЅС‡", 510);
     public static final Meal ADMIN_MEAL2 = new Meal(ADMIN_MEAL_ID + 1, of(2015, Month.JUNE, 1, 21, 0), "РђРґРјРёРЅ СѓР¶РёРЅ", 1500);
 
+    static {
+    	ADMIN_MEAL_WITH_USER.setUser(ADMIN);
+    }
+    
     public static final List<Meal> MEALS = Arrays.asList(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1);
 
     public static Meal getCreated() {

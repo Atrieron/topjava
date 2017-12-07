@@ -54,6 +54,9 @@ public class User extends AbstractNamedEntity {
     @Column(name = "calories_per_day", columnDefinition = "int default 2000")
     @Range(min = 10, max = 10000)
     private int caloriesPerDay = DEFAULT_CALORIES_PER_DAY;
+    
+    //@OneToMany(targetEntity=Meal.class, mappedBy="user", fetch=FetchType.LAZY,cascade=CascadeType.REMOVE)
+    //private Set<Meal> meals;
 
     public User() {
     }
@@ -130,4 +133,12 @@ public class User extends AbstractNamedEntity {
                 ", caloriesPerDay=" + caloriesPerDay +
                 '}';
     }
+
+	//public Set<Meal> getMeals() {
+	//	return meals;
+	//}
+
+	//public void setMeals(Set<Meal> meals) {
+	//	this.meals = meals;
+	//}
 }
