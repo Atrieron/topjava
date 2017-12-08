@@ -1,9 +1,9 @@
 package ru.javawebinar.topjava.model;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.validator.constraints.Range;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
