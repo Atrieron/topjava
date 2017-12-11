@@ -17,7 +17,7 @@ public class UserTestData {
 
     public static void assertMatch(User actual, User expected) {
         assertThat(actual).isEqualToIgnoringGivenFields(expected, "registered", "roles", "meals");
-        //assertThat(actual.getRoles()).usingDefaultElementComparator().isEqualTo(expected);
+        assertThat(actual.getRoles()).usingDefaultElementComparator().isEqualTo(expected.getRoles());
     }
 
     public static void assertMatch(Iterable<User> actual, User... expected) {
