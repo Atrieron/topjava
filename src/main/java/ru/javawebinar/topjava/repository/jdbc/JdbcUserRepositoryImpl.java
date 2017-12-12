@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.repository.jdbc;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -19,13 +20,16 @@ import ru.javawebinar.topjava.repository.UserRepository;
 
 import javax.sql.DataSource;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class JdbcUserRepositoryImpl implements UserRepository {
@@ -37,7 +41,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	private final SimpleJdbcInsert insertUser;
-	
+
 	private final DataSourceTransactionManager dataSourceTransactionManager;
 
 	@Autowired
@@ -47,22 +51,45 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
 		this.jdbcTemplate = jdbcTemplate;
 		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-		this.dataSourceTransactionManager = new DataSourceTransactionManager(dataSource); 
+		this.dataSourceTransactionManager = new DataSourceTransactionManager(dataSource);
+	}
+
+	private void saveRolesToDb(Set<Role> rolesSet, Integer userId) {
+		String sql = "INSERT INTO user_roles " + "(user_id, role) VALUES (?, ?)";
+		List<Role> roles = rolesSet.stream().sorted((r1, r2) -> (r1.name().compareTo(r2.name())))
+				.collect(Collectors.toList());
+		jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				Role role = roles.get(i);
+				ps.setInt(1, userId);
+				ps.setString(2, role.name());
+			}
+
+			@Override
+			public int getBatchSize() {
+				return roles.size();
+			}
+		});
 	}
 
 	@Override
 	public User save(User user) {
 		BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
-		if (user.isNew()) {			
+		if (user.isNew()) {
 			Number newKey = insertUser.executeAndReturnKey(parameterSource);
 			user.setId(newKey.intValue());
-		} else if (namedParameterJdbcTemplate.update(
-				"UPDATE users SET name=:name, email=:email, password=:password, "
-						+ "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id",
-				parameterSource) == 0) {
-			return null;
+		} else {
+			if (namedParameterJdbcTemplate.update(
+					"UPDATE users SET name=:name, email=:email, password=:password, "
+							+ "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id",
+					parameterSource) == 0) {
+				return null;
+			}
+			jdbcTemplate.execute("DELETE FROM user_roles WHERE user_id="+user.getId());
 		}
+		saveRolesToDb(user.getRoles(), user.getId());
 		return user;
 	}
 
@@ -133,16 +160,16 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 					"SELECT role, user_id FROM user_roles WHERE user_id in(" + stringBuilder.toString() + ")",
 					new RowCallbackHandler() {
 						@Override
-						public void processRow(ResultSet rs) throws SQLException {							
-							User currentUser = getUserByIdFromCollection(rs.getInt("user_id"), users);							
+						public void processRow(ResultSet rs) throws SQLException {
+							User currentUser = getUserByIdFromCollection(rs.getInt("user_id"), users);
 							if (currentUser != null) {
-								usersRoles.computeIfAbsent(currentUser, (userCursor)->EnumSet.noneOf(Role.class));
+								usersRoles.computeIfAbsent(currentUser, (userCursor) -> EnumSet.noneOf(Role.class));
 								usersRoles.get(currentUser).add(Role.valueOf(rs.getString("role")));
 							}
 						}
 					});
 		}
-		for(Map.Entry<User, Set<Role>> entry: usersRoles.entrySet()) {
+		for (Map.Entry<User, Set<Role>> entry : usersRoles.entrySet()) {
 			entry.getKey().setRoles(entry.getValue());
 		}
 		return users;
