@@ -1,4 +1,6 @@
 eclipse.preferences.version=1
+encoding//config/messages/app.properties=UTF-8
+encoding//config/messages/app_ru.properties=UTF-8
 encoding//src/main/java=UTF-8
 encoding//src/main/resources/db/hsqldb.properties=UTF-8
 encoding//src/main/resources/db/postgres.properties=UTF-8

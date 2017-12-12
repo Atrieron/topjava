@@ -1,19 +1,16 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
-import org.hibernate.cfg.beanvalidation.BeanValidationEventListener;
+import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 
 import ru.javawebinar.topjava.model.Role;
@@ -24,8 +21,8 @@ import javax.sql.DataSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +31,6 @@ import java.util.Set;
 public class JdbcUserRepositoryImpl implements UserRepository {
 
 	private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
-	private static final BeanPropertyRowMapper<Role> ROLE_ROW_MAPPER = BeanPropertyRowMapper.newInstance(Role.class);
 
 	private final JdbcTemplate jdbcTemplate;
 
@@ -131,20 +127,17 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 					append = true;
 				}
 				stringBuilder.append(user.getId());
-				usersRoles.put(user, new HashSet<>());
 			}
 
 			jdbcTemplate.query(
 					"SELECT role, user_id FROM user_roles WHERE user_id in(" + stringBuilder.toString() + ")",
 					new RowCallbackHandler() {
 						@Override
-						public void processRow(ResultSet rs) throws SQLException {
-							User currentUser = getUserByIdFromCollection(rs.getInt("user_id"), users);
+						public void processRow(ResultSet rs) throws SQLException {							
+							User currentUser = getUserByIdFromCollection(rs.getInt("user_id"), users);							
 							if (currentUser != null) {
-								Set<Role> currentRoles = usersRoles.get(currentUser);
-								currentRoles.add(Role.valueOf(rs.getString("role")));
-								usersRoles.put(currentUser, currentRoles);
-								//currentUser.getRoles().add(Role.valueOf(rs.getString("role")));
+								usersRoles.computeIfAbsent(currentUser, (userCursor)->EnumSet.noneOf(Role.class));
+								usersRoles.get(currentUser).add(Role.valueOf(rs.getString("role")));
 							}
 						}
 					});
