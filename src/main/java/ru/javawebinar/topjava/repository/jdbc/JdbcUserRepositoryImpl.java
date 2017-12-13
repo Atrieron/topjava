@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
-import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -13,6 +12,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -23,7 +25,6 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -75,22 +76,27 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
 	@Override
 	public User save(User user) {
-		BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
+		return new TransactionTemplate(dataSourceTransactionManager).execute(new TransactionCallback<User>() {
+			@Override
+			public User doInTransaction(TransactionStatus status) {
+				BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
-		if (user.isNew()) {
-			Number newKey = insertUser.executeAndReturnKey(parameterSource);
-			user.setId(newKey.intValue());
-		} else {
-			if (namedParameterJdbcTemplate.update(
-					"UPDATE users SET name=:name, email=:email, password=:password, "
-							+ "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id",
-					parameterSource) == 0) {
-				return null;
+				if (user.isNew()) {
+					Number newKey = insertUser.executeAndReturnKey(parameterSource);
+					user.setId(newKey.intValue());
+				} else {
+					if (namedParameterJdbcTemplate.update(
+							"UPDATE users SET name=:name, email=:email, password=:password, "
+									+ "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id",
+							parameterSource) == 0) {
+						return null;
+					}
+					jdbcTemplate.execute("DELETE FROM user_roles WHERE user_id=" + user.getId());
+				}
+				saveRolesToDb(user.getRoles(), user.getId());
+				return user;
 			}
-			jdbcTemplate.execute("DELETE FROM user_roles WHERE user_id="+user.getId());
-		}
-		saveRolesToDb(user.getRoles(), user.getId());
-		return user;
+		});
 	}
 
 	@Override
@@ -114,20 +120,30 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
 	@Override
 	public User get(int id) {
-		List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id);
-		User res = DataAccessUtils.singleResult(users);
-		getUserRoles(res);
-		return res;
+		return new TransactionTemplate(dataSourceTransactionManager).execute(new TransactionCallback<User>() {
+			@Override
+			public User doInTransaction(TransactionStatus status) {
+				List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id);
+				User res = DataAccessUtils.singleResult(users);
+				getUserRoles(res);
+				return res;
+			}
+		});
 	}
 
 	@Override
 	public User getByEmail(String email) {
 		// return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email=?",
 		// ROW_MAPPER, email);
-		List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
-		User res = DataAccessUtils.singleResult(users);
-		getUserRoles(res);
-		return res;
+		return new TransactionTemplate(dataSourceTransactionManager).execute(new TransactionCallback<User>() {
+			@Override
+			public User doInTransaction(TransactionStatus status) {
+				List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
+				User res = DataAccessUtils.singleResult(users);
+				getUserRoles(res);
+				return res;
+			}
+		});
 	}
 
 	private User getUserByIdFromCollection(int userId, List<User> users) {
