@@ -6,6 +6,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.context.support.XmlWebApplicationContext;
+
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
@@ -31,6 +33,9 @@ public class RootController {
 	private UserService service;
 	@Autowired
 	private MealService mealService;
+	
+	@Autowired
+	XmlWebApplicationContext xmlWebApplicationContext;
 
 	@GetMapping("/")
 	public String root() {
@@ -38,7 +43,7 @@ public class RootController {
 	}
 
 	@GetMapping("/users")
-	public String users(Model model) {
+	public String users(HttpServletRequest request, Model model) {
 		model.addAttribute("users", service.getAll());
 		return "users";
 	}
@@ -53,8 +58,8 @@ public class RootController {
 	@GetMapping("/meals")
 	public String meals(Model model) {
 		model.addAttribute("meals",
-				MealsUtil.getWithExceeded(mealService.getAll(AuthorizedUser.id()),
-				AuthorizedUser.getCaloriesPerDay()));
+					MealsUtil.getWithExceeded(mealService.getAll(AuthorizedUser.id()),
+							AuthorizedUser.getCaloriesPerDay()));
 		return "meals";
 	}
 	
@@ -74,27 +79,27 @@ public class RootController {
         
 		return "redirect:meals";
 	}
-	
-	@PostMapping("/meals/filter")
-	public String mealsFilter(HttpServletRequest request) {
-		LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
-        LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
-        LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
-        LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
-        
-        int userId = AuthorizedUser.id();
 
-        List<Meal> mealsDateFiltered = mealService.getBetweenDates(
-                startDate != null ? startDate : DateTimeUtil.MIN_DATE,
-                endDate != null ? endDate : DateTimeUtil.MAX_DATE, userId);        
-        
-        request.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealsDateFiltered,
-                startTime != null ? startTime : LocalTime.MIN,
-                endTime != null ? endTime : LocalTime.MAX,
-                AuthorizedUser.getCaloriesPerDay()));        
-		return "./meals";
+	@PostMapping("/meals/filter/")
+	public String mealsFilter(HttpServletRequest request, Model model) {
+		LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
+		LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
+		LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
+		LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
+
+		int userId = AuthorizedUser.id();
+
+		List<Meal> mealsDateFiltered = mealService.getBetweenDates(
+				startDate != null ? startDate : DateTimeUtil.MIN_DATE,
+				endDate != null ? endDate : DateTimeUtil.MAX_DATE, userId);
+
+		model.addAttribute("meals", MealsUtil.getFilteredWithExceeded(mealsDateFiltered,
+				startTime != null ? startTime : LocalTime.MIN,
+				endTime != null ? endTime : LocalTime.MAX,
+				AuthorizedUser.getCaloriesPerDay()));
+		return "meals";
 	}
-	
+
 	@GetMapping("/meals/update/{id}")
 	public String udpateMeal(@PathVariable("id") int id, Model model) {		 
 		model.addAttribute("meal", mealService.get(id, AuthorizedUser.id()));		
