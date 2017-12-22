@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -55,15 +54,15 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 		this.dataSourceTransactionManager = new DataSourceTransactionManager(dataSource);
 	}
 
-	private void saveRolesToDb(Set<Role> rolesSet, Integer userId) {
+	private void saveRolesToDb(User user) {
 		String sql = "INSERT INTO user_roles " + "(user_id, role) VALUES (?, ?)";
-		List<Role> roles = rolesSet.stream().sorted((r1, r2) -> (r1.name().compareTo(r2.name())))
+		List<Role> roles = user.getRoles().stream().sorted((r1, r2) -> (r1.name().compareTo(r2.name())))
 				.collect(Collectors.toList());
 		jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				Role role = roles.get(i);
-				ps.setInt(1, userId);
+				ps.setInt(1, user.getId());
 				ps.setString(2, role.name());
 			}
 
@@ -93,7 +92,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 					}
 					jdbcTemplate.execute("DELETE FROM user_roles WHERE user_id=" + user.getId());
 				}
-				saveRolesToDb(user.getRoles(), user.getId());
+				saveRolesToDb(user);
 				return user;
 			}
 		});
@@ -106,14 +105,8 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
 	private void getUserRoles(User user) {
 		if (user != null) {
-			Object[] params = new Object[] { user.getId() };
-			List<Role> roles = jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?", params,
-					new RowMapper<Role>() {
-						@Override
-						public Role mapRow(ResultSet rs, int rowNum) throws SQLException {
-							return Role.valueOf(rs.getString("role"));
-						}
-					});
+			List<Role> roles = jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
+					(rs, rowNum) -> Role.valueOf(rs.getString("role")),user.getId());
 			user.setRoles(roles);
 		}
 	}
@@ -185,9 +178,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 						}
 					});
 		}
-		for (Map.Entry<User, Set<Role>> entry : usersRoles.entrySet()) {
-			entry.getKey().setRoles(entry.getValue());
-		}
+		usersRoles.entrySet().stream().forEach((e)->e.getKey().setRoles(e.getValue()));
 		return users;
 	}
 }
