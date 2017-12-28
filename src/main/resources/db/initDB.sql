@@ -34,3 +34,10 @@ CREATE TABLE meals (
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX meals_unique_user_datetime_idx ON meals (user_id, date_time);
+
+CREATE TABLE books
+(
+  id               INTEGER PRIMARY KEY DEFAULT nextval('global_seq'),
+  name             VARCHAR                 NOT NULL,
+  print_date 	   TIMESTAMP NOT NULL
+);
