@@ -19,12 +19,6 @@ public class AdminAjaxController extends AbstractUserController {
     }
 
     @Override
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public User get(@PathVariable("id") int id) {
-        return super.get(id);
-    }
-
-    @Override
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") int id) {
         super.delete(id);
@@ -34,8 +28,6 @@ public class AdminAjaxController extends AbstractUserController {
     public void createOrUpdate(UserTo userTo) {
         if (userTo.isNew()) {
             super.create(UserUtil.createNewFromTo(userTo));
-        } else {
-            super.update(userTo, userTo.getId());
         }
     }
 
