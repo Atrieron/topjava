@@ -1,4 +1,5 @@
 var form;
+//var i18n = [];
 
 function makeEditable() {
     form = $('#detailsForm');
@@ -93,3 +94,16 @@ function renderDeleteBtn(data, type, row) {
             "<span class='glyphicon glyphicon-remove' aria-hidden='true'></span></a>";
     }
 }
+
+/*
+function putI18(){
+    i18n["addTitle"] = '<spring:message code="meal.add"/>';
+    i18n["editTitle"] = '<spring:message code="meal.edit"/>';
+
+    var arr = ["common.deleted", "common.enabled", "common.disabled", "common.errorStatus", "common.saved"];
+    arr.forEach(function(item, i, arr) {
+        alert( i + ": " + item + " (массив:" + arr + ")" );
+        i18n[item] = "<spring:message code=\""+item+"\"/>";
+    });
+}
+*/

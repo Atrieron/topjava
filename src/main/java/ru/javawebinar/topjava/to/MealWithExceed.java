@@ -3,12 +3,20 @@ package ru.javawebinar.topjava.to;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.Range;
+
 public class MealWithExceed extends BaseTo {
 
+	@NotNull
     private final LocalDateTime dateTime;
 
+    @NotBlank
     private final String description;
 
+    @Range(min = 10, max = 5000)
     private final int calories;
 
     private final boolean exceed;

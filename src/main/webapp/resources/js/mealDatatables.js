@@ -14,13 +14,27 @@ function clearFilter() {
     $.get(ajaxUrl, updateTableByData);
 }
 
+function toTwoDigitString(number) {
+    return (number>9?"":"0")+number.toString();
+}
+
 $(function () {
     datatableApi = $("#datatable").DataTable({
+        "ajax": {
+            "url": ajaxUrl,
+            "dataSrc": ""
+        },
         "paging": false,
         "info": true,
         "columns": [
             {
-                "data": "dateTime"
+                "data": "dateTime",
+                "defaultContent":"",
+                "render":function (row, data, dataIndex) {
+                    var d = new Date(row);
+                    return d.getFullYear()+"-"+toTwoDigitString(d.getMonth())+"-"+toTwoDigitString(d.getDate())+" "
+                        +toTwoDigitString(d.getHours())+":"+toTwoDigitString(d.getMinutes());
+                }
             },
             {
                 "data": "description"
@@ -30,13 +44,22 @@ $(function () {
             },
             {
                 "defaultContent": "Edit",
-                "orderable": false
+                "orderable": false,
+                "render": renderEditBtn
             },
             {
                 "defaultContent": "Delete",
-                "orderable": false
+                "orderable": false,
+                "render": renderDeleteBtn
             }
         ],
+        "createdRow": function (row, data, dataIndex) {
+            if (data.exceed) {
+                $(row).addClass("exceeded");
+            } else {
+                $(row).addClass("normal");
+            }
+        },
         "order": [
             [
                 0,
